@@ -5,10 +5,24 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 
+#dane
+# błędy suma - errorCount
+# błędy perseweracyjne - persErrorCount
+# błędy nieperseweracyjne - nonPersErrorCount
+# cisnienie - roomPress
+# poziom CO2 - roomCO2
+# poziom hałasu - roomNoise
+# reakcja skórno-galw. - EDA_E4
+# temp. skóry - Temperature
+# temp. otoczenia - roomTemp
+# tętno - Hr
+# wilgotnosc - roomHumid
+# długosc czasu pracy - obliczenia niżej, workHours
+
 startDate='2021-05-17T06:09:15.000Z'
 endDate='2021-05-17T18:00:28.000Z'
 measurment1= 'Hr'#'EDA_E4' #'roomCO2'#'Temperature
-measurment2= 'roomTemp'#'nonPersErrorCount'#'roomPress' #'roomNoise' 
+measurment2= 'workHours'#'nonPersErrorCount'#'roomPress' #'roomNoise' 
 reject_values=False
 
 if measurment1=='Hr' or measurment1=='EDA_E4':
@@ -72,10 +86,17 @@ df_series1['SMA_200'] = df_series1.average_series.rolling(200, min_periods=1).me
 #druga zmienna
 query2='select * from ' + measurment2 + ' WHERE time > \'' + startDate + '\' AND time < \'' + endDate + '\''
 series2 = client.query(query2,method=u'GET')
-
-#plt.plot(series2[measurment2].index,series2[measurment2].values, '-', color='red');
-
-df_series2=pd.DataFrame(series2[measurment2].values, index =series2[measurment2].index.transpose())  
+if measurment2 == 'workHours':
+    seconds = series2[measurment2].values[0]*60*60 #w sekundach
+    seconds_series=[seconds]
+    for index, x in enumerate(new_series_times):
+        if index>0:
+            seconds = seconds + (new_series_times[index]-new_series_times[index-1]).total_seconds()
+            seconds_series.append(seconds)
+    df_series2=pd.DataFrame(seconds_series, index =new_series_times)  
+else:
+    #plt.plot(series2[measurment2].index,series2[measurment2].values, '-', color='red');
+    df_series2=pd.DataFrame(series2[measurment2].values, index =series2[measurment2].index.transpose())  
 
 #resampling
 series1_resampled = df_series1.resample('15S').bfill()
@@ -91,14 +112,14 @@ r = np.corrcoef(x, y)
 #print(r[0, 1])
 #print(r[1, 0])
 
-r2= scipy.stats.pearsonr(x, y)
+r2= scipy.stats.pearsonr(x, y) #tylko z tej korzystam
 print(r2[0])
          
-r3=scipy.stats.spearmanr(x, y)
-print(r3[0])
+#r3=scipy.stats.spearmanr(x, y)
+#print(r3[0])
 
-r4=scipy.stats.kendalltau(x, y)
-print(r4[0])
+#r4=scipy.stats.kendalltau(x, y)
+#print(r4[0])
 
 plt.plot(x, '-', color='blue'); 
 plt.plot(y, '-', color='green'); 
