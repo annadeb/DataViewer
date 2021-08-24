@@ -21,9 +21,10 @@ import scipy.stats
 
 startDate='2021-05-17T06:09:15.000Z'
 endDate='2021-05-17T18:00:28.000Z'
-measurment1= 'Hr'#'EDA_E4' #'roomCO2'#'Temperature
-measurment2= 'workHours'#'nonPersErrorCount'#'roomPress' #'roomNoise' 
+measurment1= 'Temperature'#'EDA_E4' #'roomCO2'#'Temperature
+measurment2= 'roomTemp'#'nonPersErrorCount'#'roomPress' #'roomNoise' 
 reject_values=False
+measurment1_isBiomedical=True
 
 if measurment1=='Hr' or measurment1=='EDA_E4':
     reject_values=True
@@ -75,12 +76,15 @@ if reject_values:
     
     #plt.plot(new_series_times,new_series, '-', color='green');
     
-#srednia kroczaca
-df_series1 = pd.DataFrame(new_series, index =new_series_times)  
-df_series1['average_series'] = df_series1.mean(axis=1)
-    
-df_series1['SMA_200'] = df_series1.average_series.rolling(200, min_periods=1).mean()
-    
+#srednia kroczaca - tylko dla danych biomedycznych
+df_series1 = pd.DataFrame(new_series, index =new_series_times) 
+if measurment1_isBiomedical:  
+    df_series1['average_series'] = df_series1.mean(axis=1)
+    df_series1['Series1'] = df_series1.average_series.rolling(200, min_periods=1).mean()
+else:
+    df_series1['Series1'] = df_series1  
+
+       
 #plt.plot(df_series1['SMA_200'], '-', color='blue'); 
 
 #druga zmienna
@@ -106,7 +110,7 @@ series2_resampled = df_series2.resample('15S').bfill()
 series1_resampled['Series2']=series2_resampled
 
 #korelacja
-x = series1_resampled['SMA_200']#[0:1144]
+x = series1_resampled['Series1']#[0:1144]
 y = series1_resampled['Series2']#[0:1144]
 r = np.corrcoef(x, y)
 #print(r[0, 1])
