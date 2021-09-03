@@ -20,12 +20,12 @@ import scipy.stats
 # wilgotnosc - roomHumid
 # długosc czasu pracy - workHours - obliczenia niżej
 
-startDate='2021-07-23T06:00:15.000Z'
+startDate='2021-05-17T06:09:15.000Z'
 endDate='2021-07-23T17:00:28.000Z'
-measurment1= 'roomHumid' 
-measurment2= 'errorCount'
+measurment1= 'EDA_E4' 
+measurment2= 'workHours'
 reject_values=False
-measurment1_isBiomedical=False
+measurment1_isBiomedical=True
 
 if measurment1=='Hr' or measurment1=='EDA_E4':
     reject_values=True
@@ -122,8 +122,8 @@ fig.savefig('test2png.png', dpi=100)
 r = np.corrcoef(x, y)
 #print(r[0, 1])
 #print(r[1, 0])
-
-r2= scipy.stats.pearsonr(x, y) #tylko z tej korzystam
+#[0:387092]
+r2= scipy.stats.pearsonr(x[0:387089], y[0:387089]) #tylko z tej korzystam
 print(r2[0])
          
 #r3=scipy.stats.spearmanr(x, y)
